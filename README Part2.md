@@ -27,3 +27,44 @@ Through this comparative analysis, we gain insights into the molecular evolution
 
 ## INPUTS AND OUTPUTS 
 ### Input File Description 
+1. E_coli_cds.fasta - Complete set of E. coli coding DNA sequences (CDS). Each record represents a gene’s nucleotide sequence.
+2. Salmonella_cds.fasta - Complete set of Salmonella enterica CDS sequences for comparative analysis.
+
+### What was done 
+1. Downloaded and imported FASTA files containing complete CDS for both organisms.
+2. Counted the number of coding sequences and total coding DNA length → compiled summary tables.
+3. Calculated gene lengths and created boxplots to compare genomic size distributions.
+4. Computed nucleotide and amino-acid frequencies and visualised them as bar plots.
+5. Constructed codon-usage tables and measured Relative Synonymous Codon Usage (RSCU) values to assess bias.
+6. Identified protein k-mers (3–5 aa) that were most over- and under-represented in each organism.
+7. Compared k-mer patterns to determine whether E. coli and Salmonella share similar motif biases or evolutionary signatures.
+
+### Outcomes of the study 
+* Produced a reproducible comparative pipeline linking genomic composition to evolutionary inference.
+* Found that Salmonella enterica had slightly longer average CDS lengths and distinct GC content compared to E. coli.
+* Observed differences in codon usage bias, consistent with adaptive evolution and translation efficiency patterns (Sharp 1991).
+* Identified specific protein motifs over-represented in Salmonella, potentially linked to pathogenic or stress-response functions.
+* Demonstrated how quantitative sequence analysis can reveal functional and evolutionary relationships between organisms.
+
+## KEY LEARNING OUTCOMES 
+* Developed skills in handling FASTA genomic datasets and writing automated R pipelines.
+* Understood and applied concepts of codon usage bias, RSCU, and sequence composition.
+* Practised visualising nucleotide and amino-acid frequencies and interpreting biological significance.
+* Strengthened understanding of how evolutionary pressures shape gene structure and protein coding efficiency.
+* Enhanced data-presentation skills with publication-style tables and plots.
+
+## RELEVANCE AND FUTURE SCOPE 
+This study illustrates how comparative genomics bridges molecular biology and evolutionary theory. The workflow can be extended to:
+
+1. Larger genome datasets for multi-species evolutionary studies.
+2. Integrative analysis linking codon bias to gene expression levels and protein folding.
+3. Functional annotation of novel genes based on sequence similarity and motif enrichment.
+4. Evolutionary profiling of pathogens to identify targets for drug or vaccine development.
+
+As Koonin et al. (1995) and Sharp (1991) emphasised, understanding sequence diversity provides a foundation for functional prediction and comparative evolutionary genomics.
+
+## CITATIONS 
+1. Sharp P M 1991, ‘Determinants of DNA sequence divergence between Escherichia coli and Salmonella typhimurium: Codon usage, map position, and concerted evolution’, Journal of Molecular Evolution, 33(1): 23–33. https://doi.org/10.1007/bf02100192
+2. Koonin E V, Tatusov R L & Rudd K E 1995, ‘Sequence similarity analysis of Escherichia coli proteins: Functional and evolutionary implications’, Proceedings of the National Academy of Sciences, 92(25): 11921–11925. https://doi.org/10.1073/pnas.92.25.11921
+3. McClelland M & Wilson R K 1998, ‘Comparison of Sample Sequences of the Salmonella typhi Genome to the Sequence of the Complete Escherichia coli K-12 Genome’, Infection and Immunity, 66(9): 4305–4312. https://doi.org/10.1128/iai.66.9.4305-4312.1998
+4. ‘Statistical significance in biological sequence analysis’ 2005, Briefings in Bioinformatics, 7(1): 2–24. https://academic.oup.com/bib/article/7/1/2/262762

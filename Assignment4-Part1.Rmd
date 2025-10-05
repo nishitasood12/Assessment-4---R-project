@@ -1,0 +1,169 @@
+---
+title: 'Assessment 4 : SLE777'
+author: "Nishita Sood"
+date: "2025-09-24"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Assignment 4: R Project 
+
+## PART-1: Gene Expression & Tree Growth Analysis 
+
+### Importing & downloading gene expression tsv file 
+We begin by downloading the RNA-seq count data file (`gene_expression.tsv`) from the provided GitHub repository. This dataset contains gene expression counts for multiple samples, and we will use it to calculate summary statistics and visualise expression distributions.
+```{r}
+# Loading the required library
+library("R.utils")
+# Downloading the file directly from GitHub repo
+URL= "https://raw.githubusercontent.com/ghazkha/Assessment4/refs/heads/main/gene_expression.tsv"
+download.file(URL,destfile="gene_expression.tsv")
+list.files()
+```
+
+### STEP 1: Generating a table of values for first 6 genes
+After downloading the data, the first step is to read it into R and ensure that the first column (gene identifiers) is used as the row names for easier referencing and display the first six rows.
+```{r}
+# Reading & making gene identifiers as row name
+gene_data <- read.table("gene_expression.tsv",
+                        stringsAsFactors = FALSE,  # keeping the text as plain text
+                        header = TRUE,             # first row has column names
+                        sep = "\t",                # it's a TSV file (tab-separated)
+                        row.names = 1)             # making gene IDs the row names
+# Showing first six rows of gene data
+head(gene_data, 6)
+```
+The table shows the first six genes and their expression counts across the three samples. This confirms the dataset was imported correctly and that each gene’s expression is measured numerically.
+
+### STEP 2: Generating a table of values for first 6 genes with a new "mean column"
+We calculate the mean across all samples for each gene. This summary column allows us to quickly compare gene expression levels across the dataset.
+```{r}
+# Calculating row-wise mean across all samples
+gene_data$mean_value <- rowMeans(gene_data)
+# Displaying the first 6 rows including the new mean column
+head(gene_data, 6)
+```
+The new “mean_value” column represents the average expression level across all samples. This provides a single summary metric for comparing gene activity.
+
+### STEP 3: The top 10 genes with the highest mean value
+To find the most highly expressed genes, we sort by mean values in descending order.The code displays the top 10 genes with the highest mean value.
+```{r}
+# Sorting data frame in descending order of mean value
+top10_genes <- gene_data[order(-gene_data$mean_value), ]
+# Showing the top 10 genes
+head(top10_genes, 10)
+```
+The top 10 genes have the highest mean expression, indicating they are the most actively transcribed genes in this dataset.
+
+### STEP 4: Number of genes with a mean <10
+At this step, we count how many genes have a mean expression below 10.This helps to identify genes with low read counts, which may be filtered in downstream analysis.
+```{r}
+# Counting how many genes have mean value < 10
+low_meanexpression_genes <- sum(gene_data$mean_value < 10)
+# Results
+low_meanexpression_genes
+```
+This value shows how many genes are weakly expressed. Low-expression genes may be filtered out before differential expression analysis to reduce noise.
+
+### STEP 5: Histogram plot of the mean values 
+A histogram is created to visualise the distribution of mean values. For clarity, we subset the data and only plot genes with a mean value below 100.
+```{r}
+# Subsetting genes with mean < 100 for better visualisation
+low_mean_genes <- subset(gene_data, mean_value < 100)
+# Making a histogram from the subset
+hist(low_mean_genes$mean_value,
+     xlab = "Mean Values",
+     ylab = "Frequency",
+     main = "Histogram of mean values (<100)",
+      col = "yellow",
+     border = "black")
+```
+The histogram shows that most genes have relatively low mean expression values, while only a few are highly expressed — a typical pattern in RNA-seq data.
+
+## Importing & downloading tree growth csv file
+Next, we download the tree growth dataset (growth_data.csv) from the GitHub repository.This dataset contains circumference measurements of trees in 2005 and 2020 at two sites: northeast and southwest. This dataset help assess tree growth trends over time.
+```{r}
+# Downloading tree growth dataset
+URL="https://raw.githubusercontent.com/ghazkha/Assessment4/refs/heads/main/growth_data.csv"
+download.file(URL,destfile="growth_data.csv")
+list.files()
+```
+### STEP 6:The column names
+After downloading the data, we read it into R and display the column names.
+```{r}
+# Importing the CSV file
+growth_data <- read.csv("growth_data.csv", header = TRUE)
+# Results
+colnames(growth_data)
+```
+The dataset includes tree circumference data from two sites (northeast and southwest) at two time points (2005 and 2020), which allows comparison of growth over time.
+
+### Step 7: Calculating mean & SD of circumference (2005 vs 2020 at both sites)
+We calculate the mean and standard deviation of tree circumference at both sites in 2005 and 2020.
+This provides a summary of tree growth over the 15-year period.
+```{r}
+# Sub-setting data for each site
+siteNE <- subset(growth_data, Site == "northeast")
+siteSW <- subset(growth_data, Site == "southwest")
+
+# Creating a results table with mean & SD Values 
+results <- data.frame(
+  Site = c("Northeast", "Northeast", "Southwest", "Southwest"),
+  Year = c("2005", "2020", "2005", "2020"),
+  Mean = c(mean(siteNE$Circumf_2005_cm),
+           mean(siteNE$Circumf_2020_cm),
+           mean(siteSW$Circumf_2005_cm),
+           mean(siteSW$Circumf_2020_cm)),
+  SD = c(sd(siteNE$Circumf_2005_cm),
+         sd(siteNE$Circumf_2020_cm),
+         sd(siteSW$Circumf_2005_cm),
+         sd(siteSW$Circumf_2020_cm)),
+  stringsAsFactors = FALSE
+)
+# Displaying the results table
+results
+```
+The table summarises average tree circumference and variability (SD) for each site and year. Trees in 2020 are generally larger, suggesting growth over the 15-year period.
+
+### Step 8: Box plot of tree circumference at the start and end of the study at both sites.
+Here, We visualise the distributions of tree circumference at both sites in 2005 and 2020 using a boxplot.This provides a comparison of growth across time and location.
+```{r}
+# Creating a boxplot for tree circumference in 2005 vs 2020
+boxplot(siteNE$Circumf_2005_cm, siteNE$Circumf_2020_cm,
+        siteSW$Circumf_2005_cm, siteSW$Circumf_2020_cm,
+        ylab = "Tree circumference (cm)",
+        main = "Tree Circumference at Start (2005) vs End (2020)",
+        names = c("NE 2005", "NE 2020", "SW 2005", "SW 2020"))
+```
+The boxplot visually confirms increased tree circumference at both sites from 2005 to 2020, with northeast trees showing slightly greater median growth.
+
+### Step 9: Calculating the mean growth over the last 10 years at each site.
+Then, we calculate the average growth in circumference between 2005 and 2020 for each site. This is done by subtracting 2005 values from 2020 values.
+```{r}
+# Creating growth column = difference between 2020 and 2005
+siteNE$Growth <- siteNE$Circumf_2020_cm - siteNE$Circumf_2005_cm
+siteSW$Growth <- siteSW$Circumf_2020_cm - siteSW$Circumf_2005_cm
+
+# Summarising mean growth for each site
+growth_results <- data.frame(
+  Site = c("Northeast", "Southwest"),
+  Mean_Growth = c(mean(siteNE$Growth),
+                  mean(siteSW$Growth)),
+  stringsAsFactors = FALSE
+)
+# Displaying the results
+growth_results
+```
+This table shows the average increase in circumference per tree for each site. The northeast site has higher mean growth, indicating better growth conditions or soil factors.
+
+### Step 10: Using the t.test to estimate the p-value that the 10 year growth is different at the two sites.
+Finally, we use a t-test to compare the growth of trees between the northeast and southwest sites.
+The p-value tells us whether the difference in mean growth is statistically significant.
+```{r}
+# Running t-test for difference in growth between sites
+t.test(siteNE$Growth, siteSW$Growth)
+```
+The p-value (0.059) is slightly above 0.05, indicating that the growth difference between the northeast and southwest sites is not statistically significant.
+
+Overall, the analysis of gene expression and tree growth data revealed clear trends — most genes showed low expression levels with a few highly expressed outliers, and trees at both sites exhibited increased circumference over time, though the difference in growth between sites was not statistically significant.

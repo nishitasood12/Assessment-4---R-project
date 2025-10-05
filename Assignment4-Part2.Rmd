@@ -1,0 +1,241 @@
+---
+title: 'Assessment 4 : SLE777'
+author: "Nishita Sood"
+date: "2025-10-01"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Assignment 4: R Project 
+
+## PART-2: Examining biological sequence diversity 
+
+### Downloading and loading sequences for both organisms
+This code first loads the R.utils library, which is used to decompress files. It then defines the URL for compressed FASTA files containing Escherichia coli and Salmonella coding sequences, downloads the files, decompresses them using gunzip, and finally lists the files in the current directory to confirm the successful download and extraction.This step ensures we have complete coding-sequence (CDS) data for both organisms.
+```{r}
+suppressPackageStartupMessages({
+  library("R.utils") # general utilities like zip and unzip
+  library("seqinr") # is a package designed to process and analyse sequence data
+
+# Downloading E. coli coding sequences
+URL="http://ftp.ensemblgenomes.org/pub/bacteria/release-53/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655_gca_000005845/cds/Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa.gz"
+download.file(URL,destfile="ecoli_cds.fa.gz")
+gunzip("ecoli_cds.fa.gz", overwrite=TRUE)
+list.files()
+
+# Generating the summary of first few sequences of data
+cds_ecoli <- seqinr::read.fasta("ecoli_cds.fa")
+str(head(cds_ecoli))
+
+# Download Salmonella coding sequences
+URL="https://ftp.ensemblgenomes.ebi.ac.uk/pub/bacteria/release-62/fasta/bacteria_50_collection/salmonella_enterica_subsp_enterica_serovar_weltevreden_gca_005518735/cds/Salmonella_enterica_subsp_enterica_serovar_weltevreden_gca_005518735.ASM551873v1.cds.all.fa.gz"
+download.file(URL,destfile="salmonella_cds.fa.gz")
+gunzip("salmonella_cds.fa.gz", overwrite=TRUE)
+list.files()
+
+# Generating the summary of first few sequences of data
+cds_salmonella <- seqinr::read.fasta("salmonella_cds.fa")
+str(head(cds_salmonella))
+})
+```
+Both E. coli and Salmonella CDS files loaded successfully. These lists contain thousands of coding sequences that will be used for comparative genome analysis.
+
+### STEP 1 Counting the Number of coding sequences
+Here at very first step,we count the total number of CDS enteries in each organism and display them in a comparison table.
+```{r}
+# Counting the number of CDS in each organism
+n_ecoli <- length(cds_ecoli)
+n_salmonella <- length(cds_salmonella)
+
+# Creating a comparison table
+cds_count_table <- data.frame(
+  Organism = c("Escherichia coli (K-12 MG1655)", 
+               "Salmonella enterica subsp. enterica serovar Weltevreden"),
+  Coding_Sequences = c(n_ecoli, n_salmonella)
+)
+cds_count_table
+```
+The table shows that E. coli has a slightly different number of coding sequences compared to Salmonella, reflecting species-specific genome size and gene content.
+
+### STEP 2: Total Coding DNA Length
+We calculate the total number of base pairs (bp) contributed by all coding sequences.This helps quantify overall genome coding capacity.
+```{r}
+# Extracting gene lengths for both organisms
+len_ecoli <- as.numeric(summary(cds_ecoli)[,1])
+len_salmonella <- as.numeric(summary(cds_salmonella)[,1])
+
+# Calculating total coding DNA (sum of all CDS lengths)
+total_ecoli <- sum(len_ecoli)
+total_salmonella <- sum(len_salmonella)
+
+# Creating comparison table
+total_coding_table <- data.frame(
+  Organism = c("Escherichia coli (K-12 MG1655)",
+               "Salmonella enterica subsp. enterica serovar Weltevreden"),
+  Total_Coding_bp = c(total_ecoli, total_salmonella)
+)
+# Displaying the table
+total_coding_table
+```
+Salmonella and E. coli differ in total coding base pairs, which relates to genome complexity and the number of functional genes.
+
+### STEP 3: CDS Length Distribution (Mean, Median & Boxplot)
+We compute descriptive statistics (mean & median) and visualise the CDS length distributions using a boxplot to show variability.
+```{r}
+# Mean and median CDS lengths
+mean_ecoli <- mean(len_ecoli)
+median_ecoli <- median(len_ecoli)
+
+mean_salmonella <- mean(len_salmonella)
+median_salmonella <- median(len_salmonella)
+
+# Comparison Table 
+length_summary <- data.frame(
+  Organism = c("Escherichia coli (K-12 MG1655)",
+               "Salmonella enterica subsp. enterica serovar Weltevreden"),
+  Mean_Length_bp = c(mean_ecoli, mean_salmonella),
+  Median_Length_bp = c(median_ecoli, median_salmonella)
+)
+# Displaying the table
+length_summary
+
+# Boxplot comparison of CDS lengths
+boxplot(list(E_coli = len_ecoli, Salmonella = len_salmonella),
+        ylab = "Coding sequence length (bp)",
+        main = "Distribution of CDS lengths in E. coli vs Salmonella")
+```
+The mean and median CDS lengths are similar between both species, though E. coli shows slightly longer genes overall. The boxplot indicates comparable variability in gene lengths.
+
+### STEP 4: Nucleotide and Amino Acid frequency
+Next, We compare the base composition (A, T, G, C) and amino-acid composition of the two organisms.
+Differences in these frequencies can reveal genomic and proteomic biases.
+```{r}
+# Combining all the CDS for each organism into single DNA sequences
+dna_ecoli <- unlist(cds_ecoli)
+dna_salmonella <- unlist(cds_salmonella)
+
+# Counting and normalising nucleotide frequencies (C,G,A,T)
+freq_ecoli <- count(dna_ecoli, 1)
+freq_salmonella <- count(dna_salmonella, 1)
+prop_ecoli <- freq_ecoli / sum(freq_ecoli)
+prop_salmonella <- freq_salmonella / sum(freq_salmonella)
+
+# Barplots of nucleotide proportions
+par(mfrow = c(1, 2))
+barplot(prop_ecoli,
+        main = "E. coli Nucleotide Frequency",
+        xlab = "Nucleotides", ylab = "Proportion", col = "lightblue")
+barplot(prop_salmonella,
+        main = "Salmonella Nucleotide Frequency",
+        xlab = "Nucleotides", ylab = "Proportion", col = "lightgreen")
+par(mfrow = c(1, 1))   # reset layout
+
+# Translating CDS to proteins
+prot_ecoli <- lapply(cds_ecoli, translate)
+prot_salmonella <- lapply(cds_salmonella, translate)
+
+# Defining amino acid alphabet (exclude stop codon '*')
+aa <- unique(unlist(prot_ecoli))
+aa <- aa[aa != "*"]
+
+# Counting amino-acid frequencies (excluding stop codon '*')
+aa_freq_ecoli <- count(unlist(prot_ecoli), 1, alphabet = aa)
+aa_freq_salmonella <- count(unlist(prot_salmonella), 1, alphabet = aa)
+aa_prop_ecoli <- aa_freq_ecoli / sum(aa_freq_ecoli)
+aa_prop_salmonella <- aa_freq_salmonella / sum(aa_freq_salmonella)
+
+# Barplots for amino acid proprotions
+par(mfrow = c(1, 2))
+barplot(aa_prop_ecoli,
+        main = "E. coli Amino Acid Frequency",
+        las = 2, ylab = "Proportion", col = "lightblue")
+barplot(aa_prop_salmonella,
+        main = "Salmonella Amino Acid Frequency",
+        las = 2, ylab = "Proportion", col = "lightgreen")
+par(mfrow = c(1, 1))
+```
+Both organisms show similar base compositions dominated by A and T, typical for bacteria. Amino acid frequencies show conservation in major residues like Leu, Ala, and Gly, but minor variations suggest species-specific coding preferences.
+
+### STEP 5: Codon Usage Bias 
+We examine Relative Synonymous Codon Usage (RSCU) to assess codon-bias patterns.The mean & SD of RSCU values are compared between the two organisms.
+```{r}
+# Codon usage for E. coli
+uco_ecoli <- uco(unlist(cds_ecoli), index="rscu", as.data.frame=TRUE)
+
+# Codon usage for Salmonella
+uco_salmonella <- uco(unlist(cds_salmonella), index="rscu", as.data.frame=TRUE)
+
+# Displaying first few rows to check structure
+head(uco_ecoli)
+head(uco_salmonella)
+
+# Plot comparison of RSCU values
+par(mfrow=c(2,1))
+barplot(uco_ecoli$RSCU, names.arg=uco_ecoli$codon, las=2, cex.names=0.6,
+        main="E. coli Codon Usage (RSCU)", col="lightblue", ylab="RSCU Value")
+barplot(uco_salmonella$RSCU, names.arg=uco_salmonella$codon, las=2, cex.names=0.6,
+        main="Salmonella Codon Usage (RSCU)", col="lightgreen", ylab="RSCU Value")
+par(mfrow=c(1,1))
+
+# Calculating basic statistics for codon bias
+mean_rscu_ecoli <- mean(uco_ecoli$RSCU, na.rm=TRUE)
+sd_rscu_ecoli <- sd(uco_ecoli$RSCU, na.rm=TRUE)
+
+mean_rscu_salmonella <- mean(uco_salmonella$RSCU, na.rm=TRUE)
+sd_rscu_salmonella <- sd(uco_salmonella$RSCU, na.rm=TRUE)
+
+# Creating summary table for codon bias comparison
+codon_bias_summary <- data.frame(
+  Organism = c("E. coli (K-12 MG1655)",
+               "Salmonella enterica subsp. enterica serovar Weltevreden"),
+  Mean_RSCU = c(mean_rscu_ecoli, mean_rscu_salmonella),
+  SD_RSCU = c(sd_rscu_ecoli, sd_rscu_salmonella)
+)
+codon_bias_summary
+```
+The RSCU plots reveal that certain codons are used more frequently than others, indicating codon bias. The average RSCU and SD values suggest E. coli has slightly stronger codon preference, which can affect translation efficiency.
+
+### STEP 6: Protein Sequence and K-mer profiling
+Finally, we identify the most over- and under-represented amino-acid motifs (k-mers) of length 3 – 5 in the proteins of both organisms.
+```{r}
+# Combining all protein sequences into one vector
+prot_all_salmonella <- unlist(prot_salmonella)
+prot_all_ecoli <- unlist(prot_ecoli)
+
+# Counting k-mers (3 to 5 amino acids long)
+# k = 3
+k3_salmonella <- count(prot_all_salmonella, wordsize=3, alphabet=aa, freq=TRUE)
+# k = 4
+k4_salmonella <- count(prot_all_salmonella, wordsize=4, alphabet=aa, freq=TRUE)
+# k = 5
+k5_salmonella <- count(prot_all_salmonella, wordsize=5, alphabet=aa, freq=TRUE)
+
+# Identifying top and bottom 10 k-mers for Salmonella
+top10_k3_salmonella <- head(sort(k3_salmonella, decreasing=TRUE), 10)
+bottom10_k3_salmonella <- head(sort(k3_salmonella, decreasing=FALSE), 10)
+
+# Comparison with e coli
+k3_ecoli <- count(prot_all_ecoli, wordsize=3, alphabet=aa, freq=TRUE)
+top10_k3_ecoli <- head(sort(k3_ecoli, decreasing=TRUE), 10)
+bottom10_k3_ecoli <- head(sort(k3_ecoli, decreasing=FALSE), 10)
+
+# Creating the barplots for visualisation
+par(mfrow=c(2,2))
+barplot(top10_k3_salmonella, las=2, col="lightgreen",
+        main="Top 10 Overrepresented 3-mers (Salmonella)",
+        ylab="Frequency")
+barplot(bottom10_k3_salmonella, las=2, col="pink",
+        main="Top 10 Underrepresented 3-mers (Salmonella)",
+        ylab="Frequency")
+barplot(top10_k3_ecoli, las=2, col="lightblue",
+        main="Top 10 Overrepresented 3-mers (E. coli)",
+        ylab="Frequency")
+barplot(bottom10_k3_ecoli, las=2, col="orange",
+        main="Top 10 Underrepresented 3-mers (E. coli)",
+        ylab="Frequency")
+par(mfrow=c(1,1))
+```
+The k-mer plots show which amino acid motifs are most and least frequent. Differences between E. coli and Salmonella may relate to variations in protein structure, adaptation, or selective pressure.
+
+In summary, the comparative sequence analysis showed that E. coli and Salmonella share similar overall genomic patterns but differ slightly in coding sequence lengths, nucleotide composition, codon usage bias, and k-mer profiles, reflecting subtle species-specific adaptations in their genomes.

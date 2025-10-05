@@ -1,9 +1,9 @@
 # EXAMINING BIOLOGICAL SEQUENCE DIVERSITY
-SEQUENCE - Salmonella enterica subsp. enterica serovar Weltevreden (GCA_005518735)
+SEQUENCE - *Salmonella enterica subsp. enterica serovar Weltevreden (GCA_005518735)*
 
 ## INTRODUCTION 
 Comparative sequence analysis is a central tool in molecular biology and evolutionary genomics. By examining coding DNA and protein sequences between different organisms, researchers can uncover functional similarities, evolutionary divergence, and species-specific adaptations (Sharp 1991; Koonin et al. 1995).
-In this project, we compared Escherichia coli and Salmonella enterica using their complete sets of coding DNA sequences (CDS). E. coli serves as a model organism with a well-annotated genome, while Salmonella represents a closely related but pathogenic bacterium. The analysis quantifies differences in coding sequence composition, codon usage, and amino-acid patterns, illustrating how sequence diversity reflects evolutionary and functional variation (McClelland & Wilson 1998).
+In this project, we compared *Escherichia coli* and *Salmonella enterica* using their complete sets of coding DNA sequences (CDS). E. coli serves as a model organism with a well-annotated genome, while Salmonella represents a closely related but pathogenic bacterium. The analysis quantifies differences in coding sequence composition, codon usage, and amino-acid patterns, illustrating how sequence diversity reflects evolutionary and functional variation (McClelland & Wilson 1998).
 The workflow applies R-based computational methods to quantify genome-wide differences, visualise distributions, and statistically interpret variation following accepted frameworks of biological sequence analysis (Briefings in Bioinformatics 2005).
 
 ## PURPOSE 
@@ -61,7 +61,7 @@ This study illustrates how comparative genomics bridges molecular biology and ev
 3. Functional annotation of novel genes based on sequence similarity and motif enrichment.
 4. Evolutionary profiling of pathogens to identify targets for drug or vaccine development.
 
-As Koonin et al. (1995) and Sharp (1991) emphasised, understanding sequence diversity provides a foundation for functional prediction and comparative evolutionary genomics.
+As Koonin et al. (1995) and Sharp (1991) emphasised, understanding sequence diversity provides a foundation for functional prediction and comparative evolutionary genomics. This project demonstrates how computational genomics and R-based analysis can reveal evolutionary and functional diversity between closely related bacterial species.
 
 ## CITATIONS 
 1. Sharp P M 1991, ‘Determinants of DNA sequence divergence between Escherichia coli and Salmonella typhimurium: Codon usage, map position, and concerted evolution’, Journal of Molecular Evolution, 33(1): 23–33. https://doi.org/10.1007/bf02100192
